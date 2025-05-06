@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Dashboard | FoodTrend Analytics{% endblock %}
+{% block content %}
+  <h2 class="mb-4">Search Recipes</h2>
+  <form action="/search" method="get" class="row g-3 mb-5">
+    <div class="col-md-8">
+      <input type="text" class="form-control" name="q" placeholder="Search for recipes..." required />
+    </div>
+    <div class="col-md-4">
+      <button type="submit" class="btn btn-primary w-100">Search</button>
+    </div>
+  </form>
+
+  <h2 class="mb-3">Ingredient Trend</h2>
+  <div class="row g-3 mb-3">
+    <div class="col-md-8">
+      <input id="ing" type="text" class="form-control" placeholder="e.g. tomato" />
+    </div>
+    <div class="col-md-4">
+      <button id="trendBtn" class="btn btn-success w-100">Show Trend</button>
+    </div>
+  </div>
+  <div class="bg-light p-3 rounded" style="max-width: 700px;">
+    <canvas id="trendChart" height="200"></canvas>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  <script>
+    async function fetchJSON(url) {
+      const res = await fetch(url);
+      const text = await res.text();
+      if (!res.ok) throw new Error(`HTTP ${res.status}: ${text}`);
+      try {
+        return JSON.parse(text);
+      } catch {
+        console.error("Invalid JSON:", text);
+        throw new Error("Invalid JSON response");
+      }
+    }
+
+    let trendChart = null;
+    document.addEventListener("DOMContentLoaded", () => {
+      const btn = document.getElementById("trendBtn");
+      const input = document.getElementById("ing");
+      const canvas = document.getElementById("trendChart");
+
+      btn.onclick = async () => {
+        const ing = input.value.trim();
+        if (!ing) return alert("Please enter an ingredient");
+        try {
+          const data = await fetchJSON(`/trends?ingredient=${encodeURIComponent(ing)}`);
+          if (trendChart) trendChart.destroy();
+          trendChart = new Chart(canvas.getContext("2d"), {
+            type: "line",
+            data: {
+              labels: data.dates,
+              datasets: [{ label: ing, data: data.counts, tension: 0.3 }]
+            },
+            options: {
+              responsive: true,
+              plugins: { legend: { display: true } }
+            }
+          });
+        } catch (err) {
+          console.error(err);
+          alert("Failed to load trend data.");
+        }
+      };
+    });
+  </script>
+{% endblock %}

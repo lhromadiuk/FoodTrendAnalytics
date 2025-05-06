@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}{{ recipe.title }} | FoodTrend{% endblock %}
+{% block content %}
+  <h2>{{ recipe.title }}</h2>
+  <p><strong>Cuisine:</strong> {{ recipe.cuisine }}</p>
+
+  {% if recipe.image_url %}
+    <img src="{{ recipe.image_url }}" class="img-fluid my-3" alt="Recipe image">
+  {% endif %}
+
+  <h4>Ingredients</h4>
+  <ul>
+    {% for ing in recipe.ingredients %}
+      <li>{{ ing }}</li>
+    {% endfor %}
+  </ul>
+
+  <h4>Instructions</h4>
+  <p>{{ recipe.instructions }}</p>
+
+  <a href="/" class="btn btn-outline-secondary mt-4">← Back to dashboard</a>
+{% endblock %}

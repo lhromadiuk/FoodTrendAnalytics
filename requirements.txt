@@ -1,0 +1,12 @@
+Flask
+Flask-SQLAlchemy
+click
+elasticsearch
+psycopg2-binary
+requests
+sentence-transformers
+pandas
+ruptures
+gunicorn
+python-dotenv
+Flask-Migrate
