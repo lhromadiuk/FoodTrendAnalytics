@@ -1,12 +1,9 @@
 from flask import Blueprint, render_template, request, jsonify, current_app, abort
 
-from . import ingest_data
 from .search import search_recipes, get_es_client, ES_INDEX
-
-
+from .ingest import ingest_data
 from datetime import datetime, timedelta
 import random
-# Blueprint for main routes
 bp = Blueprint('main', __name__)
 
 @bp.route('/')
