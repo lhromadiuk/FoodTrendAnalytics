@@ -1,4 +1,6 @@
-from flask import Blueprint, render_template, request, jsonify,current_app
+from flask import Blueprint, render_template, request, jsonify, current_app, abort
+
+from . import ingest_data
 from .search import search_recipes, get_es_client, ES_INDEX
 
 
@@ -34,7 +36,14 @@ def ingredient_trend():
 
     return jsonify({"dates": dates, "counts": counts})
 
-
+@bp.route("/run-ingest")
+def run_ingest():
+    token = request.args.get("token")
+    if token != current_app.config.get("INGEST_TOKEN"):
+        abort(403)
+    with current_app.app_context():
+        total_added = ingest_data()
+    return f" Ingestion triggered, {total_added} recipes added"
 
 @bp.route("/recipe/<id>")
 def recipe_detail(id):

@@ -8,8 +8,7 @@ from .search import index_recipe
 import string
 
 
-@click.command('ingest-data')
-@with_appcontext
+
 def ingest_data():
     """Fetch recipes from API and store + index them"""
     base_url = current_app.config['MEALDB_URL']
@@ -38,4 +37,10 @@ def ingest_data():
                 db.session.commit()
                 index_recipe(r)
                 total_added += 1
+    return total_added
+
+@click.command('ingest-data')
+@with_appcontext
+def cli_ingest_data():
+    total_added = ingest_data()
     click.echo(f'Ingestion complete, {total_added} recipes added')
