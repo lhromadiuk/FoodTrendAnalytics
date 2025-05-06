@@ -11,6 +11,6 @@ class Config:
     # Elasticsearch
     ELASTIC_ENDPOINT = os.getenv('ELASTIC_ENDPOINT','')
     ELASTIC_API_KEY = os.getenv('ELASTIC_API_KEY', '')
-
+    INGEST_TOKEN = os.getenv('INGEST_TOKEN', '')
     # Data ingestion
     MEALDB_URL = os.getenv('MEALDB_URL', 'https://www.themealdb.com/api/json/v1/1/search.php?f=a')
