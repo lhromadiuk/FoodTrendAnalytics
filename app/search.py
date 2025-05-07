@@ -74,7 +74,8 @@ def search_recipes(query):
                         "match": {
                             "title": {
                                 "query": query,
-                                "boost": 5
+                                "boost": 5,
+                                "fuzziness": "AUTO"
                             }
                         }
                     },
@@ -82,7 +83,8 @@ def search_recipes(query):
                         "match": {
                             "ingredients": {
                                 "query": query,
-                                "boost": 4
+                                "boost": 4,
+                                "fuzziness": "AUTO"
                             }
                         }
                     },
@@ -98,7 +100,8 @@ def search_recipes(query):
                         "match": {
                             "cuisine": {
                                 "query": query,
-                                "boost": 3
+                                "boost": 4,
+                                "fuzziness": "AUTO"
                             }
                         }
                     }
