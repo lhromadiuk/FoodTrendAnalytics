@@ -90,7 +90,7 @@ def search_recipes(query):
                         "match": {
                             "title": {
                                 "query": query,
-                                "boost": 4,
+                                "boost": 5,
                                 "fuzziness": "AUTO"
                             }
                         }
@@ -99,7 +99,7 @@ def search_recipes(query):
                         "match": {
                             "ingredients": {
                                 "query": query,
-                                "boost": 3,
+                                "boost": 4,
                                 "fuzziness": "AUTO"
                             }
                         }
@@ -108,7 +108,7 @@ def search_recipes(query):
                         "match": {
                             "instructions": {
                                 "query": query,
-                                "boost": 2
+                                "boost": 3
                             }
                         }
                     },
@@ -116,16 +116,44 @@ def search_recipes(query):
                         "match": {
                             "cuisine": {
                                 "query": query,
-                                "boost": 3,
+                                "boost": 5,
                                 "fuzziness": "AUTO"
                             }
                         }
+                    },
+                    {
+                        "bool": {
+                            "must": [
+                                {
+                                    "match": {
+                                        "ingredients": {
+                                            "query": query,
+                                            "fuzziness": "AUTO"
+                                        }
+                                    }
+                                },
+                                {
+                                    "match": {
+                                        "cuisine": {
+                                            "query": query,
+                                            "fuzziness": "AUTO"
+                                        }
+                                    }
+                                }, {
+                                    "match": {
+                                        "instructions": {
+                                            "query": query,
+                                            "fuzziness": "AUTO"
+                                        }
+                                    }
+                                }
+
+                            ],
+                            "boost": 5
+                        }
                     }
-                ],
-                "minimum_should_match": 1
-            }
-        }
-    }
+                ]
+            }}}
 
     res = es.search(index=ES_INDEX, body=body)
     return [
