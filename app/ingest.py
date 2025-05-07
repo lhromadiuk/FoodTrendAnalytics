@@ -33,7 +33,8 @@ def ingest_data():
                     if name:
                         ing = Ingredient.query.filter_by(name=name).first() or Ingredient(name=name)
                         db.session.add(ing)
-                        r.ingredients.append(ing)
+                        if ing not in r.ingredients:
+                            r.ingredients.append(ing)
                 db.session.commit()
                 index_recipe(r)
                 total_added += 1
