@@ -69,21 +69,41 @@ def search_recipes(query):
     body = {
         "query": {
             "bool": {
-                "must": {
-                    "multi_match": {
-                        "query": query,
-                        "fields": [
-                            "title^4",
-                            "instructions^2",
-                            "cuisine^7",
-                            "ingredients^3"
-                        ],
-                        "type": "best_fields"
-                    }
-                },
                 "should": [
-                    {"match": {"cuisine": {"query": query, "boost": 1}}}
-                ]
+                    {
+                        "match": {
+                            "title": {
+                                "query": query,
+                                "boost": 5
+                            }
+                        }
+                    },
+                    {
+                        "match": {
+                            "ingredients": {
+                                "query": query,
+                                "boost": 4
+                            }
+                        }
+                    },
+                    {
+                        "match": {
+                            "instructions": {
+                                "query": query,
+                                "boost": 2
+                            }
+                        }
+                    },
+                    {
+                        "match": {
+                            "cuisine": {
+                                "query": query,
+                                "boost": 3
+                            }
+                        }
+                    }
+                ],
+                "minimum_should_match": 1
             }
         }
     }
