@@ -6,8 +6,8 @@ from flask import current_app
 from flask.cli import with_appcontext
 
 from .database import db
+from .elastic_search import index_recipe
 from .models import Recipe, Ingredient
-from .search import index_recipe
 
 
 def ingest_data():
@@ -49,3 +49,13 @@ def ingest_data():
 def cli_ingest_data():
     total_added = ingest_data()
     click.echo(f'Ingestion complete, {total_added} recipes added')
+
+
+@click.command('train-word2vec')
+@with_appcontext
+def cli_train_word2vec():
+    from .embedding import train_model
+    from .models import Recipe
+    all_recipes = Recipe.query.all()
+
+    train_model(all_recipes)

@@ -1,7 +1,9 @@
 import os
+
 from dotenv import load_dotenv
 
 load_dotenv()
+
 
 class Config:
     # Database configuration
@@ -9,8 +11,11 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # Elasticsearch
-    ELASTIC_ENDPOINT = os.getenv('ELASTIC_ENDPOINT','')
+    ELASTIC_ENDPOINT = os.getenv('ELASTIC_ENDPOINT', '')
     ELASTIC_API_KEY = os.getenv('ELASTIC_API_KEY', '')
     INGEST_TOKEN = os.getenv('INGEST_TOKEN', '')
     # Data ingestion
-    MEALDB_URL = os.getenv('MEALDB_URL', 'https://www.themealdb.com/api/json/v1/1/search.php?f=a')
+    MEALDB_URL = os.getenv('MEALDB_URL', '')
+
+    # Word2Vec m
+    W2V_MODEL_PATH = os.getenv('W2V_MODEL_PATH', 'models/w2v.model')

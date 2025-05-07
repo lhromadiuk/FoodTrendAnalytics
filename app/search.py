@@ -1,168 +1,36 @@
-# app/search.py
-from elasticsearch import Elasticsearch
-from flask import current_app
+from numpy import dot
+from numpy.linalg import norm
 
-ES_INDEX = 'recipes'
-
-
-def get_es_client():
-    cfg = current_app.config
-    endpoint = cfg.get('ELASTIC_ENDPOINT')
-    api_key = cfg.get('ELASTIC_API_KEY')
-
-    if not endpoint or not api_key:
-        raise RuntimeError("ENDPOINT and API_KEY must be set")
-
-    return Elasticsearch(endpoint, api_key=api_key)
+from app.embedding import preprocess_text, get_model, embed_tokens
+from app.models import Recipe
+from app.utils import get_recipe_vectors
 
 
-def init_index(es):
-    if not es.indices.exists(index=ES_INDEX):
-        es.indices.create(index=ES_INDEX, body={
-            'mappings': {
-                'properties': {
-                    'title': {
-                        'type': 'text'
-                    },
-                    'cuisine': {
-                        'type': 'text',
-                        'fields': {
-                            'raw': {'type': 'keyword'}
-                        }
-                    },
-                    'instructions': {
-                        'type': 'text'
-                    },
-                    'ingredients': {
-                        'type': 'text',
-                        'fields': {
-                            'raw': {'type': 'keyword'}
-                        }
-                    },
-                    'image_url': {
-                        'type': 'keyword'
-                    }
-                }
-            }
-
-        })
+def cosine_similarity(vec1, vec2):
+    denominator = norm(vec1) * norm(vec2)
+    return dot(vec1, vec2) / denominator if denominator != 0 else 0
 
 
-def index_recipe(recipe):
-    es = get_es_client()
-    init_index(es)
-    doc = {
-        'title': recipe.title,
-        'cuisine': recipe.cuisine,
-        'instructions': recipe.instructions,
-        'ingredients': [ingredient.name for ingredient in recipe.ingredients],
-        'image_url': recipe.image_url
-    }
-    es.index(index=ES_INDEX, id=recipe.id, document=doc)
+def search_recipes(query):  # semantic search using Word2Vec
+    model = get_model()
+    q_vec = embed_tokens(preprocess_text(query), model.wv)
+    recipes_vectors = get_recipe_vectors()
+    scores = []
+    for rid, vec in recipes_vectors.items():
+        sim = cosine_similarity(q_vec, vec)
+        scores.append((rid, sim))
 
+    top_matches = sorted(scores, key=lambda x: x[1], reverse=True)[:10]
 
-def search_recipes(query):
-    query = query.strip().lower()
-    es = get_es_client()
-    init_index(es)
+    recipes = Recipe.get_by_ids([rid for rid, _ in top_matches])
+    recipe_dict = {r.id: r for r in recipes}
 
-    body = {
-        "query": {
-            "bool": {
-                "should": [
-                    {
-                        "match_phrase": {
-                            "title": {
-                                "query": query,
-                                "boost": 8
-                            }
-                        }
-                    },
-                    {
-                        "match_phrase": {
-                            "ingredients": {
-                                "query": query,
-                                "boost": 6
-                            }
-                        }
-                    },
-                    {
-                        "match": {
-                            "title": {
-                                "query": query,
-                                "boost": 5,
-                                "fuzziness": "AUTO"
-                            }
-                        }
-                    },
-                    {
-                        "match": {
-                            "ingredients": {
-                                "query": query,
-                                "boost": 4,
-                                "fuzziness": "AUTO"
-                            }
-                        }
-                    },
-                    {
-                        "match": {
-                            "instructions": {
-                                "query": query,
-                                "boost": 3
-                            }
-                        }
-                    },
-                    {
-                        "match": {
-                            "cuisine": {
-                                "query": query,
-                                "boost": 5,
-                                "fuzziness": "AUTO"
-                            }
-                        }
-                    },
-                    {
-                        "bool": {
-                            "must": [
-                                {
-                                    "match": {
-                                        "ingredients": {
-                                            "query": query,
-                                            "fuzziness": "AUTO"
-                                        }
-                                    }
-                                },
-                                {
-                                    "match": {
-                                        "cuisine": {
-                                            "query": query,
-                                            "fuzziness": "AUTO"
-                                        }
-                                    }
-                                }, {
-                                    "match": {
-                                        "instructions": {
-                                            "query": query,
-                                            "fuzziness": "AUTO"
-                                        }
-                                    }
-                                }
-
-                            ],
-                            "boost": 5
-                        }
-                    }
-                ]
-            }}}
-
-    res = es.search(index=ES_INDEX, body=body)
     return [
         {
-            "id": hit["_id"],
-            "title": hit["_source"]["title"],
-            "cuisine": hit["_source"]["cuisine"],
-            "image_url": hit["_source"].get("image_url"),
-            "score": hit["_score"]
+            "title": recipe_dict[rid].title,
+            "score": round(sim, 2),
+            "id": rid
         }
-        for hit in res["hits"]["hits"]
+        for rid, sim in top_matches
+        if rid in recipe_dict
     ]

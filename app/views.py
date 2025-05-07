@@ -4,7 +4,8 @@ from datetime import datetime, timedelta
 from flask import Blueprint, render_template, request, jsonify, current_app, abort
 
 from .ingest import ingest_data
-from .search import search_recipes, get_es_client, ES_INDEX
+from .models import Recipe
+from .search import search_recipes
 
 bp = Blueprint('main', __name__)
 
@@ -20,7 +21,8 @@ def search_page():
     if not query:
         return render_template("search.html", results=[], query="")
 
-    results = search_recipes(query=query)
+    results = search_recipes(query)
+
     return render_template("search.html", results=results, query=query)
 
 
@@ -54,11 +56,8 @@ def run_ingest():
 
 @bp.route("/recipe/<id>")
 def recipe_detail(id):
-    es = get_es_client()
-    try:
-        res = es.get(index=ES_INDEX, id=id)
-        r = res["_source"]
-    except:
+    recipe = Recipe.get_by_id(id)
+    if not recipe:
         return render_template("404.html"), 404
 
-    return render_template("recipe.html", recipe=r)
+    return render_template("recipe.html", recipe=recipe)

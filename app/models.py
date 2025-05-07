@@ -7,6 +7,7 @@ recipe_ingredients = db.Table(
     db.Column('ingredient_id', db.Integer, db.ForeignKey('ingredients.id'), primary_key=True)
 )
 
+
 class Recipe(db.Model):
     __tablename__ = 'recipes'
     id = db.Column(db.Integer, primary_key=True)
@@ -18,6 +19,22 @@ class Recipe(db.Model):
     ingredients = db.relationship(
         'Ingredient', secondary=recipe_ingredients, back_populates='recipes'
     )
+
+    @classmethod
+    def get_by_id(cls, id_):
+        return cls.query.get(id_)
+
+    @classmethod
+    def get_by_ids(cls, ids):
+        if not ids:
+            return []
+
+        if not isinstance(ids, (list, tuple, set)):
+            return cls.get_by_id(ids)
+
+        # Return list of matching recipes
+        return cls.query.filter(cls.id.in_(ids)).all()
+
 
 class Ingredient(db.Model):
     __tablename__ = 'ingredients'
