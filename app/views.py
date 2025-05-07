@@ -22,7 +22,6 @@ def search_page():
         return render_template("search.html", results=[], query="")
 
     results = search_recipes(query=query)
-    print(results)
     return render_template("search.html", results=results, query=query)
 
 
