@@ -71,10 +71,26 @@ def search_recipes(query):
             "bool": {
                 "should": [
                     {
+                        "match_phrase": {
+                            "title": {
+                                "query": query,
+                                "boost": 8
+                            }
+                        }
+                    },
+                    {
+                        "match_phrase": {
+                            "ingredients": {
+                                "query": query,
+                                "boost": 6
+                            }
+                        }
+                    },
+                    {
                         "match": {
                             "title": {
                                 "query": query,
-                                "boost": 5,
+                                "boost": 4,
                                 "fuzziness": "AUTO"
                             }
                         }
@@ -83,7 +99,7 @@ def search_recipes(query):
                         "match": {
                             "ingredients": {
                                 "query": query,
-                                "boost": 4,
+                                "boost": 3,
                                 "fuzziness": "AUTO"
                             }
                         }
@@ -100,7 +116,7 @@ def search_recipes(query):
                         "match": {
                             "cuisine": {
                                 "query": query,
-                                "boost": 4,
+                                "boost": 3,
                                 "fuzziness": "AUTO"
                             }
                         }
