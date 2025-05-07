@@ -2,6 +2,7 @@ import os
 import re
 import string
 
+import nltk
 import numpy as np
 from flask import current_app
 from gensim.models import Word2Vec
@@ -10,6 +11,10 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 
 from app.models import Recipe
+
+nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('wordnet')
 
 lemmatizer = WordNetLemmatizer()
 stop_words = set(stopwords.words('english'))

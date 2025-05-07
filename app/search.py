@@ -28,7 +28,8 @@ def search_recipes(query):  # semantic search using Word2Vec
     return [
         {
             "title": recipe_dict[rid].title,
-            "score": round(sim, 2),
+            "score": round(sim * 100, 2),
+            "cuisine": recipe_dict[rid].cuisine,
             "id": rid
         }
         for rid, sim in top_matches
