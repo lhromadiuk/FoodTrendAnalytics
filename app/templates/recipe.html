@@ -1,22 +1,35 @@
 {% extends "base.html" %}
 {% block title %}{{ recipe.title }} | FoodTrend{% endblock %}
+
 {% block content %}
-  <h2>{{ recipe.title }}</h2>
-  <p><strong>Cuisine:</strong> {{ recipe.cuisine }}</p>
+    <div class="row mb-4 align-items-start">
+        <div class="col-md-5 pe-2">
+            <h2 class="mb-1">{{ recipe.title }}</h2>
+            <p><strong>Cuisine:</strong> {{ recipe.cuisine }}</p>
 
-  {% if recipe.image_url %}
-    <img src="{{ recipe.image_url }}" class="img-fluid my-3" alt="Recipe image">
-  {% endif %}
+            <h4 class="mt-4">Ingredients</h4>
+            <ul class="list-unstyled ps-3">
+                {% for ing in recipe.ingredients %}
+                    <li>• {{ ing }}</li>
+                {% endfor %}
+            </ul>
+        </div>
 
-  <h4>Ingredients</h4>
-  <ul>
-    {% for ing in recipe.ingredients %}
-      <li>{{ ing }}</li>
-    {% endfor %}
-  </ul>
+        {% if recipe.image_url %}
+            <div class="col-md-4">
+                <img src="{{ recipe.image_url }}" alt="Recipe image"
+                     class="img-fluid rounded border shadow mt-5"
+                     style="max-height: 305px; width: 100%; object-fit: fill;"/>
+            </div>
+        {% endif %}
+    </div>
 
-  <h4>Instructions</h4>
-  <p>{{ recipe.instructions }}</p>
+    <hr/>
 
-  <a href="/" class="btn btn-outline-secondary mt-4">← Back to dashboard</a>
+    <div class="mt-4">
+        <h4>Instructions</h4>
+        <p style="white-space: pre-line;">{{ recipe.instructions }}</p>
+        <a href="/" class="btn btn-outline-secondary mt-4">← Back to Dashboard</a>
+    </div>
+
 {% endblock %}
