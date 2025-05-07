@@ -1,15 +1,19 @@
+import random
+from datetime import datetime, timedelta
+
 from flask import Blueprint, render_template, request, jsonify, current_app, abort
 
+from .ingest import ingest_data
 from .models import Recipe
 from .search import search_recipes, get_es_client, ES_INDEX, index_recipe
-from .ingest import ingest_data
-from datetime import datetime, timedelta
-import random
+
 bp = Blueprint('main', __name__)
+
 
 @bp.route('/')
 def dashboard():
     return render_template('dashboard.html')
+
 
 @bp.route('/search')
 def search_page():
@@ -18,6 +22,7 @@ def search_page():
         return render_template("search.html", results=[], query="")
 
     results = search_recipes(query=query)
+    print(results)
     return render_template("search.html", results=results, query=query)
 
 
@@ -34,6 +39,7 @@ def ingredient_trend():
 
     return jsonify({"dates": dates, "counts": counts})
 
+
 @bp.route("/run-ingest")
 def run_ingest():
     token = request.args.get("token")
@@ -46,6 +52,7 @@ def run_ingest():
     except Exception as e:
         print(f" Ingestion failed: {e}")
         return render_template("404.html"), 404
+
 
 @bp.route("/reindex")
 def reindex_all():
@@ -65,6 +72,8 @@ def reindex_all():
             failed += 1
 
     return f"Reindex complete: {success} indexed, {failed} failed"
+
+
 @bp.route("/recipe/<id>")
 def recipe_detail(id):
     es = get_es_client()

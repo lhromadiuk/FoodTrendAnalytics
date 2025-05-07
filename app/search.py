@@ -55,32 +55,39 @@ def index_recipe(recipe):
         'title': recipe.title,
         'cuisine': recipe.cuisine,
         'instructions': recipe.instructions,
-        'ingredients': [ingredient.name for ingredient in recipe.ingredients]
+        'ingredients': [ingredient.name for ingredient in recipe.ingredients],
+        'image_url': recipe.image_url
     }
     es.index(index=ES_INDEX, id=recipe.id, document=doc)
 
 
 def search_recipes(query):
+    query = query.strip().lower()
     es = get_es_client()
     init_index(es)
 
     body = {
-        'query': {
-            'bool': {
-                'must': {
-                    'multi_match': {
-                        'query': query,
-                        'fields': [
-                            'title^3',
-                            'instructions^1',
-                            'cuisine^5',
-                            'ingredients^2'
+        "query": {
+            "bool": {
+                "must": {
+                    "multi_match": {
+                        "query": query,
+                        "fields": [
+                            "title^4",
+                            "instructions^2",
+                            "cuisine^7",
+                            "ingredients^3"
                         ],
+                        "type": "best_fields"
                     }
-                }
+                },
+                "should": [
+                    {"match": {"cuisine": {"query": query, "boost": 1}}}
+                ]
             }
         }
     }
+
     res = es.search(index=ES_INDEX, body=body)
     return [
         {
