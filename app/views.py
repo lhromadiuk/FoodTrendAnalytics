@@ -4,8 +4,7 @@ from datetime import datetime, timedelta
 from flask import Blueprint, render_template, request, jsonify, current_app, abort
 
 from .ingest import ingest_data
-from .models import Recipe
-from .search import search_recipes, get_es_client, ES_INDEX, index_recipe
+from .search import search_recipes, get_es_client, ES_INDEX
 
 bp = Blueprint('main', __name__)
 
@@ -51,26 +50,6 @@ def run_ingest():
     except Exception as e:
         print(f" Ingestion failed: {e}")
         return render_template("404.html"), 404
-
-
-@bp.route("/reindex")
-def reindex_all():
-    token = request.args.get("token")
-    if token != current_app.config.get("INGEST_TOKEN"):
-        abort(403)
-
-    recipes = Recipe.query.all()
-    success, failed = 0, 0
-
-    for recipe in recipes:
-        try:
-            index_recipe(recipe)
-            success += 1
-        except Exception as e:
-            print(f" Failed to index recipe {recipe.id}: {e}")
-            failed += 1
-
-    return f"Reindex complete: {success} indexed, {failed} failed"
 
 
 @bp.route("/recipe/<id>")
