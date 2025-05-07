@@ -25,18 +25,20 @@ def ingest_data():
                     title=item['strMeal'],
                     cuisine=item['strArea'],
                     instructions=item.get('strInstructions',''),
+                    published_at=item.get('dateModified',''),
                     image_url = item.get('strMealThumb','')
                 )
                 db.session.add(r)
                 for i in range(1, 21):
                     name = item.get(f'strIngredient{i}')  #.title()
-                    if name:
+                    if name and name.strip():
+                        name = name.strip().lower()
                         ing = Ingredient.query.filter_by(name=name).first() or Ingredient(name=name)
                         db.session.add(ing)
                         if ing not in r.ingredients:
                             r.ingredients.append(ing)
                 db.session.commit()
-                index_recipe(r)
+                #index_recipe(r)
                 total_added += 1
     return total_added
 

@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, jsonify, current_app, abort
 
-from .search import search_recipes, get_es_client, ES_INDEX
+from .models import Recipe
+from .search import search_recipes, get_es_client, ES_INDEX, index_recipe
 from .ingest import ingest_data
 from datetime import datetime, timedelta
 import random
@@ -22,7 +23,7 @@ def search_page():
 
 @bp.route("/trends")
 def ingredient_trend():
-    ingredient = request.args.get("ingredient", "").lower()
+    ingredient = request.args.get("ingredient", "").strip().lower()
     if not ingredient:
         return jsonify({"error": "Missing ingredient"}), 400
 
@@ -45,6 +46,25 @@ def run_ingest():
     except Exception as e:
         print(f" Ingestion failed: {e}")
         return render_template("404.html"), 404
+
+@bp.route("/reindex")
+def reindex_all():
+    token = request.args.get("token")
+    if token != current_app.config.get("INGEST_TOKEN"):
+        abort(403)
+
+    recipes = Recipe.query.all()
+    success, failed = 0, 0
+
+    for recipe in recipes:
+        try:
+            index_recipe(recipe)
+            success += 1
+        except Exception as e:
+            print(f" Failed to index recipe {recipe.id}: {e}")
+            failed += 1
+
+    return f"Reindex complete: {success} indexed, {failed} failed"
 @bp.route("/recipe/<id>")
 def recipe_detail(id):
     es = get_es_client()
