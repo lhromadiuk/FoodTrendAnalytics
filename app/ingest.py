@@ -13,7 +13,7 @@ def ingest_data():
     """Fetch recipes from API and store + index them"""
     base_url = current_app.config['MEALDB_URL']
     total_added = 0
-    for letter in string.ascii_lowercase:
+    for letter in string.ascii_lowercase[:15]:
         url = f"{base_url}{letter}"
 
         meals = requests.get(url).json().get('meals') or []
@@ -38,7 +38,7 @@ def ingest_data():
                         if ing not in r.ingredients:
                             r.ingredients.append(ing)
                 db.session.commit()
-                #index_recipe(r)
+                index_recipe(r)
                 total_added += 1
     return total_added
 
