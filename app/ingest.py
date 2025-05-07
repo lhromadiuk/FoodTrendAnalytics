@@ -29,7 +29,7 @@ def ingest_data():
                 )
                 db.session.add(r)
                 for i in range(1, 21):
-                    name = item.get(f'strIngredient{i}').title()
+                    name = item.get(f'strIngredient{i}')  #.title()
                     if name:
                         ing = Ingredient.query.filter_by(name=name).first() or Ingredient(name=name)
                         db.session.add(ing)

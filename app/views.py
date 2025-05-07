@@ -38,10 +38,13 @@ def run_ingest():
     token = request.args.get("token")
     if token != current_app.config.get("INGEST_TOKEN"):
         abort(403)
-    with current_app.app_context():
-        total_added = ingest_data()
-    return f" Ingestion triggered, {total_added} recipes added"
-
+    try:
+        with current_app.app_context():
+            total_added = ingest_data()
+        return f" Ingestion triggered, {total_added} recipes added"
+    except Exception as e:
+        print(f" Ingestion failed: {e}")
+        return render_template("404.html"), 404
 @bp.route("/recipe/<id>")
 def recipe_detail(id):
     es = get_es_client()

@@ -41,7 +41,7 @@ def index_recipe(recipe):
         'title':        recipe.title,
         'cuisine':      recipe.cuisine,
         'instructions': recipe.instructions,
-        'ingredients':  [ingredient.name.title() for ingredient in recipe.ingredients]
+        'ingredients':  [ingredient.name for ingredient in recipe.ingredients]
     }
     es.index(index=ES_INDEX, id=recipe.id, document=doc)
 
