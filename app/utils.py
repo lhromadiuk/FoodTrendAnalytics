@@ -1,13 +1,14 @@
 from flask import current_app
 from gensim.models import Word2Vec
 
-from .embedding import tokenize_recipe, embed_weighted, train_model
+from .embedding import tokenize_recipe, embed_weighted, train_model, tokenize_recipe_flat, embed_tokens
 from .models import Recipe, Ingredient
 
 _recipe_vectors = None
 _model = None
 _cuisines = None
 _ingredients = None
+_spell_checker = None
 
 
 def get_model():
@@ -20,6 +21,14 @@ def get_model():
     return _model
 
 
+def get_spellchecker():
+    global _spell_checker
+    if _spell_checker is None:
+        from spellchecker import SpellChecker
+        _spell_checker = SpellChecker()
+    return _spell_checker
+
+
 def get_recipe_vectors():
     global _recipe_vectors
     if _recipe_vectors is None:
@@ -27,7 +36,8 @@ def get_recipe_vectors():
         model = get_model()
         recipes = Recipe.query.all()
         _recipe_vectors = {
-            r.id: embed_weighted(tokenize_recipe(r), model)
+            r.id: 0.6 * embed_weighted(tokenize_recipe(r), model) + 0.4 * embed_tokens(tokenize_recipe_flat(r),
+                                                                                       model.wv)
             for r in recipes
         }
     return _recipe_vectors
