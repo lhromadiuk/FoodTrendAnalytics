@@ -8,10 +8,11 @@ from flask.cli import with_appcontext
 from .database import db
 from .elastic_search import index_recipe
 from .models import Recipe, Ingredient
+from .utils import reload_model
 
 
 def ingest_data():
-    """Fetch recipes from API and store + index them"""
+    """fetch recipes from API and store + index them for elastic search"""
     base_url = current_app.config['MEALDB_URL']
     total_added = 0
     for letter in string.ascii_lowercase:
@@ -49,6 +50,7 @@ def ingest_data():
 def cli_ingest_data():
     total_added = ingest_data()
     click.echo(f'Ingestion complete, {total_added} recipes added')
+    reload_model()
 
 
 @click.command('train-word2vec')

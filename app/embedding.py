@@ -4,13 +4,10 @@ import string
 
 import nltk
 import numpy as np
-from flask import current_app
 from gensim.models import Word2Vec
 from nltk import WordNetLemmatizer
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
-
-from app.models import Recipe
 
 nltk.download('punkt')
 nltk.download('stopwords')
@@ -19,12 +16,12 @@ nltk.download('wordnet')
 lemmatizer = WordNetLemmatizer()
 stop_words = set(stopwords.words('english'))
 
-
-def get_model():
-    model_path = current_app.config.get('W2V_MODEL_PATH')
-    if not model_path:
-        return train_model(Recipe.query.all())
-    return Word2Vec.load(model_path)
+_weights = {
+    "cuisine": 2.0,
+    "title": 3.0,
+    "ingredients": 1.5,
+    "instructions": 1.0
+}
 
 
 def embed_tokens(tokens, word_vectors):
@@ -34,7 +31,18 @@ def embed_tokens(tokens, word_vectors):
     return np.mean([word_vectors[token] for token in valid_tokens], axis=0)
 
 
-def preprocess_text(text):
+def embed_weighted(tokenized_recipe, model):
+    vectors = []
+    total_weight = 0
+    for section, tokens in tokenized_recipe.items():
+        weight = _weights.get(section, 0)
+        embedded_section = embed_tokens(tokens, model.wv)
+        vectors.append(embedded_section * weight)
+        total_weight += weight
+    return np.sum(vectors, axis=0) / total_weight if total_weight > 0 else np.zeros(model.vector_size)
+
+
+def tokenize_text(text):
     text = text.lower()
     text = re.sub(r'\d+', '', text)
     text = text.translate(str.maketrans('', '', string.punctuation))
@@ -44,18 +52,27 @@ def preprocess_text(text):
 
 
 def tokenize_recipe(recipe):
-    tokens = [
+    return {
+        "cuisine": tokenize_text(recipe.cuisine or ""),
+        "title": tokenize_text(recipe.title or ""),
+        "ingredients": tokenize_text(' '.join(i.name for i in recipe.ingredients)),
+        "instructions": tokenize_text(recipe.instructions or "")
+    }
+
+
+def tokenize_recipe_flat(recipe):
+    parts = [
         recipe.cuisine,
         recipe.title,
         ' '.join([ing.name for ing in recipe.ingredients]),
         recipe.instructions
     ]
-    text = ' '.join(tokens)
-    return preprocess_text(text)
+    text = ' '.join([str(p) for p in parts if p])
+    return tokenize_text(text)
 
 
 def train_model(all_recipes, model_path="models/w2v.model"):
-    tokenized_docs = [tokenize_recipe(r) for r in all_recipes if r]
+    tokenized_docs = [tokenize_recipe_flat(r) for r in all_recipes if r]
 
     model = Word2Vec(
         sentences=tokenized_docs,

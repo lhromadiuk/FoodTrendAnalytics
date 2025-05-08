@@ -1,9 +1,9 @@
 from numpy import dot
 from numpy.linalg import norm
 
-from app.embedding import preprocess_text, get_model, embed_tokens
+from app.embedding import tokenize_text, embed_weighted
 from app.models import Recipe
-from app.utils import get_recipe_vectors
+from app.utils import get_recipe_vectors, get_model, get_cuisines, get_ingredients
 
 
 def cosine_similarity(vec1, vec2):
@@ -11,9 +11,32 @@ def cosine_similarity(vec1, vec2):
     return dot(vec1, vec2) / denominator if denominator != 0 else 0
 
 
+def tokenize_query(query):
+    tokens = tokenize_text(query)
+    cuisine_set = get_cuisines()
+    ingredient_set = get_ingredients()
+
+    categorized = {
+        "cuisine": [],
+        "title": [],
+        "ingredients": [],
+        "instructions": []
+    }
+
+    for word in tokens:
+        if word in cuisine_set:
+            categorized["cuisine"].append(word)
+        elif word in ingredient_set:
+            categorized["ingredients"].append(word)
+        else:
+            categorized["title"].append(word)
+
+    return categorized
+
+
 def search_recipes(query):  # semantic search using Word2Vec
     model = get_model()
-    q_vec = embed_tokens(preprocess_text(query), model.wv)
+    q_vec = embed_weighted(tokenize_query(query), model.wv)
     recipes_vectors = get_recipe_vectors()
     scores = []
     for rid, vec in recipes_vectors.items():
