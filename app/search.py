@@ -36,7 +36,7 @@ def tokenize_query(query):
 
 def search_recipes(query):  # semantic search using Word2Vec
     model = get_model()
-    q_vec = embed_weighted(tokenize_query(query), model.wv)
+    q_vec = embed_weighted(tokenize_query(query), model)
     recipes_vectors = get_recipe_vectors()
     scores = []
     for rid, vec in recipes_vectors.items():
