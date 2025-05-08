@@ -27,7 +27,7 @@ def get_recipe_vectors():
         model = get_model()
         recipes = Recipe.query.all()
         _recipe_vectors = {
-            r.id: embed_weighted(tokenize_recipe(r), model.wv)
+            r.id: embed_weighted(tokenize_recipe(r), model)
             for r in recipes
         }
     return _recipe_vectors
