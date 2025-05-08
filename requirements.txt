@@ -14,7 +14,7 @@ gensim~=4.3.2
 MyApplication~=0.1.0
 numpy~=1.26.3
 nltk~=3.8.1
-pyspellchecker
+pyspellchecker~=0.8.2
 pytest~=8.1.2
 typing_extensions~=4.13.2
 pillow~=11.2.1

@@ -19,10 +19,10 @@ def dashboard():
 def search_page():
     query = request.args.get("q", "")
     if not query:
-        return render_template("search.html", results=[], query="")
-
+        return render_template("search.html", results=[], query=" ")
     results = search_recipes(query)
-
+    if results[0]["score"] < 0.1:
+        return render_template("search.html", results=[], query=query)
     return render_template("search.html", results=results, query=query)
 
 
