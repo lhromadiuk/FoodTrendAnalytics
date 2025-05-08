@@ -31,6 +31,3 @@ def create_app():
         return render_template("404.html"), 404
 
     return app
-
-
-app = create_app()

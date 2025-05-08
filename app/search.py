@@ -23,15 +23,15 @@ def tokenize_query(query):
         "ingredients": [],
         "instructions": []
     }
-
-    for word in [spell_checker.correction(t) for t in tokens]:
+    corrected_tokens = [spell_checker.correction(t) for t in tokens]
+    for word in corrected_tokens:
         if word in cuisine_set:
             categorized["cuisine"].append(word)
         elif word in ingredient_set:
             categorized["ingredients"].append(word)
         else:
             categorized["title"].append(word)
-
+    print(f"Tokenized query: {tokens}")  # Debugging line
     return categorized
 
 
