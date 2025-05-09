@@ -17,7 +17,7 @@ def get_model():
     global _model
     if _model is None:
         print("Loading GloVe model from local file...")
-        _model = KeyedVectors.load("data/glove_100.kv", mmap='r')  # mmap for speed
+        _model = KeyedVectors.load("/data/glove_100.kv", mmap='r')  # mmap for speed
     return SimpleNamespace(wv=_model, vector_size=_model.vector_size)
 
 
