@@ -1,7 +1,8 @@
-from flask import current_app
-from gensim.models import Word2Vec
+import os
 
-from .embedding import tokenize_recipe, embed_weighted, train_model, tokenize_recipe_flat, embed_tokens
+from gensim.downloader import load as gensim_load
+
+from .embedding import tokenize_recipe, embed_weighted, tokenize_recipe_flat, embed_tokens
 from .models import Recipe, Ingredient
 
 _recipe_vectors = None
@@ -9,16 +10,26 @@ _model = None
 _cuisines = None
 _ingredients = None
 _spell_checker = None
+_recipes = None
+
+MODEL_PATH = "/data/glove_model.kv"
 
 
 def get_model():
-    global _model
-    if _model is None:
-        model_path = current_app.config.get('W2V_MODEL_PATH')
-        if not model_path:
-            return train_model(Recipe.query.all())
-        _model = Word2Vec.load(model_path)
-    return _model
+    # global _model
+    # if _model is None:
+    #    print("Loading GloVe model from local file...")
+    #    _model = KeyedVectors.load("models/glove_100.kv", mmap='r')  # mmap for speed
+    # return SimpleNamespace(wv=_model, vector_size=_model.vector_size)
+
+    if not os.path.exists(MODEL_PATH):
+        print("Downloading GloVe model...")
+        model = gensim_load("glove-wiki-gigaword-100")
+        model.save(MODEL_PATH)
+    else:
+        from gensim.models import KeyedVectors
+        model = KeyedVectors.load(MODEL_PATH)
+        return model
 
 
 def get_spellchecker():
@@ -26,7 +37,30 @@ def get_spellchecker():
     if _spell_checker is None:
         from spellchecker import SpellChecker
         _spell_checker = SpellChecker()
+        domain_words = build_domain_vocabulary(get_recipes())
+        _spell_checker.word_frequency.load_words(domain_words)
+        print(f"Spellchecker loaded with {len(domain_words)} domain-specific words.")
     return _spell_checker
+
+
+def get_recipes():
+    global _recipes
+    if _recipes is None:
+        _recipes = set(Recipe.query.all())
+    return _recipes
+
+
+def build_domain_vocabulary(recipes):
+    words = set()
+    for recipe in recipes:
+        words.update(recipe.title.lower().split())
+        words.update(recipe.cuisine.lower())
+        for ing in recipe.ingredients:
+            words.update(ing.name.lower().split())
+
+        if recipe.instructions:
+            words.update(recipe.instructions.lower().split())
+    return {w.strip(".,()") for sub in words for w in (sub if isinstance(sub, list) else [sub])}
 
 
 def get_recipe_vectors():
@@ -35,6 +69,8 @@ def get_recipe_vectors():
         print("Caching recipe vectors...")
         model = get_model()
         recipes = Recipe.query.all()
+        global _recipes
+        _recipes = recipes
         _recipe_vectors = {
             r.id: 0.6 * embed_weighted(tokenize_recipe(r), model) + 0.4 * embed_tokens(tokenize_recipe_flat(r),
                                                                                        model.wv)

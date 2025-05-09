@@ -1,13 +1,10 @@
-import os
 import re
 import string
 
 import nltk
 import numpy as np
-from gensim.models import Word2Vec
-from nltk import WordNetLemmatizer
+from nltk import WordNetLemmatizer, word_tokenize
 from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
 
 nltk.download('punkt')
 nltk.download('stopwords')
@@ -19,8 +16,8 @@ stop_words = set(stopwords.words('english'))
 _weights = {
     "cuisine": 1.8,
     "title": 2.0,
-    "ingredients": 1.7,
-    "instructions": 1.2
+    "ingredients": 1.5,
+    "instructions": 0
 }
 
 
@@ -39,6 +36,7 @@ def embed_weighted(tokenized_recipe, model):
         embedded_section = embed_tokens(tokens, model.wv)
         vectors.append(embedded_section * weight)
         total_weight += weight
+    print(np.sum(vectors, axis=0) / total_weight if total_weight > 0 else np.zeros(model.vector_size))
     return np.sum(vectors, axis=0) / total_weight if total_weight > 0 else np.zeros(model.vector_size)
 
 
@@ -71,6 +69,7 @@ def tokenize_recipe_flat(recipe):
     return tokenize_text(text)
 
 
+""" train Word2Vec
 def train_model(all_recipes, model_path="models/w2v.model"):
     tokenized_docs = [tokenize_recipe_flat(r) for r in all_recipes if r]
 
@@ -86,3 +85,4 @@ def train_model(all_recipes, model_path="models/w2v.model"):
     model.save(model_path)
     print(f"Word2Vec model trained and saved to {model_path}")
     return model
+"""
