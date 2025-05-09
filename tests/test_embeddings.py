@@ -115,16 +115,16 @@ def test_embed_weighted_correct_weights_math(test_model):
     vec = embed_weighted(tokenized, test_model)
 
     # Expected weighted vector :
-    # cuisine: [0,0,0,1]*2.0
-    # title: avg([1,0,0,0], [0,1,0,0]) -> [0.5, 0.5, 0, 0] * 2.2
-    # ingredients: [1,0,0,0] * 1.6
-    # instructions: avg([0,0,1,0], [0,1,0,0]) -> [0, 0.5, 0.5, 0] * 1.2
+    # cuisine: [0,0,0,1]*1.8
+    # title: avg([1,0,0,0], [0,1,0,0]) -> [0.5, 0.5, 0, 0] * 2.0
+    # ingredients: [1,0,0,0] * 1.5
+    # instructions: avg([0,0,1,0], [0,1,0,0]) -> [0, 0.5, 0.5, 0] * 0
 
     expected = (
-                       2.0 * np.array([0, 0, 0, 1]) +
-                       2.2 * np.array([0.5, 0.5, 0, 0]) +
-                       1.6 * np.array([1, 0, 0, 0]) +
-                       1.2 * np.array([0, 0.5, 0.5, 0])
-               ) / (2.0 + 2.2 + 1.6 + 1.2)
+                       1.8 * np.array([0, 0, 0, 1]) +
+                       2.0 * np.array([0.5, 0.5, 0, 0]) +
+                       1.5 * np.array([1, 0, 0, 0]) +
+                       0 * np.array([0, 0.5, 0.5, 0])
+               ) / (1.8 + 2.0 + 1.5 + 0)
 
     assert np.allclose(vec, expected)
