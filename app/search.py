@@ -16,8 +16,6 @@ def tokenize_query(query):
     cuisine_set = get_cuisines()
     ingredient_set = get_ingredients()
     spell_checker = get_spellchecker()
-    print(ingredient_set)
-    print(cuisine_set)
     categorized = {
         "cuisine": [],
         "title": [],

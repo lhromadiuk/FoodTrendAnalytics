@@ -25,7 +25,7 @@ def get_model():
         return SimpleNamespace(wv=_model, vector_size=_model.vector_size)
     else:
         print("Loading GloVe model from local file...")
-        return KeyedVectors.load(_model, mmap='r')
+        return KeyedVectors.load(path, mmap='r')
 
 
 def get_spellchecker():
