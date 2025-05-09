@@ -18,14 +18,18 @@ _recipes = None
 def get_model():
     global _model
     path = "/data/glove_100.kv"
-    if not _model or not os.path.exists(path):
-        print("Downloading GloVe model...")
-        _model = load("glove-wiki-gigaword-100")
-        _model.save(path)
-        return SimpleNamespace(wv=_model, vector_size=_model.vector_size)
-    else:
+    if _model:
+        return _model
+
+    if os.path.exists(path):
         print("Loading GloVe model from local file...")
-        return KeyedVectors.load(path, mmap='r')
+        kv = KeyedVectors.load(path, mmap='r')
+    else:
+        print("Downloading GloVe model...")
+        kv = load("glove-wiki-gigaword-100")
+        kv.save(path)
+    _model = SimpleNamespace(wv=kv, vector_size=kv.vector_size)
+    return _model
 
 
 def get_spellchecker():
