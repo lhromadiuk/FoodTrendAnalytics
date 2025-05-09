@@ -1,6 +1,6 @@
-import os
+from types import SimpleNamespace
 
-from gensim.downloader import load as gensim_load
+from gensim.models import KeyedVectors
 
 from .embedding import tokenize_recipe, embed_weighted, tokenize_recipe_flat, embed_tokens
 from .models import Recipe, Ingredient
@@ -12,24 +12,13 @@ _ingredients = None
 _spell_checker = None
 _recipes = None
 
-MODEL_PATH = "/data/glove_model.kv"
-
 
 def get_model():
-    # global _model
-    # if _model is None:
-    #    print("Loading GloVe model from local file...")
-    #    _model = KeyedVectors.load("models/glove_100.kv", mmap='r')  # mmap for speed
-    # return SimpleNamespace(wv=_model, vector_size=_model.vector_size)
-
-    if not os.path.exists(MODEL_PATH):
-        print("Downloading GloVe model...")
-        model = gensim_load("glove-wiki-gigaword-100")
-        model.save(MODEL_PATH)
-    else:
-        from gensim.models import KeyedVectors
-        model = KeyedVectors.load(MODEL_PATH)
-        return model
+    global _model
+    if _model is None:
+        print("Loading GloVe model from local file...")
+        _model = KeyedVectors.load("data/glove_100.kv", mmap='r')  # mmap for speed
+    return SimpleNamespace(wv=_model, vector_size=_model.vector_size)
 
 
 def get_spellchecker():
