@@ -40,7 +40,7 @@ def search_recipes(query):  # semantic search using Word2Vec
     q_vec_categorized = embed_weighted(tokenize_query(query), model)
     q_vec_flat = embed_tokens(tokenize_text(query), model.wv)
     recipes_vectors = get_recipe_vectors()
-    q_vec = 0.6 * q_vec_categorized + 0.4 * q_vec_flat
+    q_vec = 0.5 * q_vec_categorized + 0.5 * q_vec_flat
     scores = []
     for rid, vec in recipes_vectors.items():
         sim = cosine_similarity(q_vec, vec)
@@ -54,7 +54,7 @@ def search_recipes(query):  # semantic search using Word2Vec
     return [
         {
             "title": recipe_dict[rid].title,
-            "score": round(sim * 100, 2),
+            "score": round(sim * 10, 2),
             "cuisine": recipe_dict[rid].cuisine,
             "id": rid
         }

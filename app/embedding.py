@@ -17,9 +17,9 @@ lemmatizer = WordNetLemmatizer()
 stop_words = set(stopwords.words('english'))
 
 _weights = {
-    "cuisine": 2.0,
-    "title": 2.2,
-    "ingredients": 1.6,
+    "cuisine": 1.8,
+    "title": 2.0,
+    "ingredients": 1.7,
     "instructions": 1.2
 }
 
