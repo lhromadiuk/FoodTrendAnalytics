@@ -10,7 +10,7 @@
             <h4 class="mt-4">Ingredients</h4>
             <ul class="list-unstyled ps-3">
                 {% for ing in recipe.ingredients %}
-                    <li>• {{ ing.name }}</li>
+                    <li>• {{ ing.name.lower() }}</li>
                 {% endfor %}
             </ul>
         </div>

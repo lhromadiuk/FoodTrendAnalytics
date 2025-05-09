@@ -121,10 +121,10 @@ def test_embed_weighted_correct_weights_math(test_model):
     # instructions: avg([0,0,1,0], [0,1,0,0]) -> [0, 0.5, 0.5, 0] * 0
 
     expected = (
-                       1.8 * np.array([0, 0, 0, 1]) +
-                       2.0 * np.array([0.5, 0.5, 0, 0]) +
-                       1.5 * np.array([1, 0, 0, 0]) +
+                       3.2 * np.array([0, 0, 0, 1]) +
+                       2.7 * np.array([0.5, 0.5, 0, 0]) +
+                       2.0 * np.array([1, 0, 0, 0]) +
                        0 * np.array([0, 0.5, 0.5, 0])
-               ) / (1.8 + 2.0 + 1.5 + 0)
+               ) / (3.2 + 2.7 + 2.0 + 0)
 
     assert np.allclose(vec, expected)

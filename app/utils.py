@@ -17,7 +17,7 @@ _recipes = None
 
 def get_model():
     global _model
-    path = "/data/glove_100.kv"
+    path = "models/glove_100.kv"
     if _model:
         return _model
 

@@ -14,9 +14,9 @@ lemmatizer = WordNetLemmatizer()
 stop_words = set(stopwords.words('english'))
 
 _weights = {
-    "cuisine": 1.8,
-    "title": 2.0,
-    "ingredients": 1.5,
+    "cuisine": 3.2,
+    "title": 2.7,
+    "ingredients": 2.0,
     "instructions": 0
 }
 
@@ -36,7 +36,6 @@ def embed_weighted(tokenized_recipe, model):
         embedded_section = embed_tokens(tokens, model.wv)
         vectors.append(embedded_section * weight)
         total_weight += weight
-    print(np.sum(vectors, axis=0) / total_weight if total_weight > 0 else np.zeros(model.vector_size))
     return np.sum(vectors, axis=0) / total_weight if total_weight > 0 else np.zeros(model.vector_size)
 
 
